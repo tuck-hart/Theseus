@@ -1570,6 +1570,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "memuse"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "task",
+]
+
+[[package]]
+name = "memuse_test"
+version = "0.1.0"
+dependencies = [
+ "memuse",
+]
+
+[[package]]
 name = "mkdir"
 version = "0.1.0"
 dependencies = [

@@ -1,0 +1,9 @@
+[package]
+authors = ["Tucker Hart <tucker.hart@yale.edu>"]
+name = "memuse_test"
+description = "Memuse test call."
+version = "0.1.0"
+build = "../../build.rs"
+
+[dependencies.memuse]
+path = "../../kernel/memuse"
