@@ -289,6 +289,8 @@ pub struct Task {
 
     /// The unique identifier of this Task.
     pub id: usize,
+    /// Size of memory allocated on the heap for this task
+    memsize: MutexIrqSafe<usize>,
     /// The simple name of this Task.
     pub name: String,
     /// Which cpu core this Task is currently running on;
@@ -420,6 +422,7 @@ impl Task {
                 restart_info: None,
             }),
             id: task_id,
+            memsize: MutexIrqSafe::new(0),
             name: format!("task_{}", task_id),
             runstate: AtomicCell::new(RunState::Initing),
             running_on_cpu: AtomicCell::new(None.into()),
@@ -902,6 +905,34 @@ impl TaskRef {
         while self.0.is_running() { }
 
         Ok(())
+    }
+
+    /// Sets the size of memory 
+    /// 
+    /// # Locking / Deadlock
+    pub fn get_memsize(&self) -> usize {
+        *self.0.memsize.lock()
+    }
+
+    /// Updates the size of memory 
+    /// 
+    /// # Locking / Deadlock
+    pub fn update_memsize(&self, size:usize, add:bool) {
+        let mut memsize = self.0.memsize.lock();
+        if add {
+            *memsize += size;
+        } else {
+            if *memsize >= size {
+                *memsize -= size;
+            } else {
+                *memsize = 0;
+            }
+        }
+    }
+
+    pub fn get_stacksize(&self) -> usize {
+        let mut inner = self.inner.lock();
+        (inner.kstack.bottom() + inner.kstack.size_in_bytes()).value() - inner.saved_sp
     }
 
     /// Call this function to indicate that this task has successfully ran to completion,

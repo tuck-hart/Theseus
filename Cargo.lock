@@ -1032,6 +1032,7 @@ dependencies = [
  "log",
  "memory",
  "spin 0.9.0",
+ "task",
 ]
 
 [[package]]
@@ -1573,6 +1574,23 @@ dependencies = [
  "memory_structs",
  "multiboot2",
  "x86_64",
+]
+
+[[package]]
+name = "memuse"
+version = "0.1.0"
+dependencies = [
+ "heap",
+ "log",
+ "task",
+]
+
+[[package]]
+name = "memuse_test"
+version = "0.1.0"
+dependencies = [
+ "memuse",
+ "task",
 ]
 
 [[package]]

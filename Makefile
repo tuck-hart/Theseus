@@ -717,7 +717,7 @@ ifeq ($(host),yes)
 	## KVM acceleration is required when using the host cpu model
 	QEMU_FLAGS += -cpu host -accel kvm
 else
-	QEMU_FLAGS += -cpu Broadwell
+	QEMU_FLAGS += -cpu Broadwell,+sse4.2,+x2apic -smp 2,maxcpus=2
 endif
 
 ## Currently, kvm by itself can cause problems, but it works with the "host" option (above).
@@ -758,6 +758,9 @@ loadable: run
 ### builds and runs Theseus in QEMU
 run: $(iso) 
 	qemu-system-x86_64 $(QEMU_FLAGS)
+
+runTuck: $(iso)
+	qemu-system-x86_64 -m 2048M -cdrom build/theseus-x86_64.iso -cpu Broadwell,+sse4.2,+x2apic -smp 2,maxcpus=2 -boot d -serial mon:$(SERIAL1) -serial mon:$(SERIAL2)
 
 
 ### builds and runs Theseus in QEMU, but pauses execution until a GDB instance is connected.

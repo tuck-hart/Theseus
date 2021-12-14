@@ -22,3 +22,6 @@ path = "../kernel_config"
 
 [dependencies.block_allocator]
 path = "../block_allocator"
+
+[dependencies.task]
+path = "../task"

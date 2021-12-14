@@ -12,12 +12,12 @@ command -v brew >/dev/null 2>&1 || { echo >&2 "Missing homebrew (\`brew\`). Inst
 #### force re-fetch our own gcc cross compilers tap recipe
 #brew untap theseus-os/gcc_cross_compilers || true
 #brew tap theseus-os/gcc_cross_compilers
-#brew install x86_64-elf-binutils x86_64-elf-gcc
+brew install x86_64-elf-binutils x86_64-elf-gcc
 
 
 ### Using mac ports instead of our own x86_64-elf-gcc homebrew tap recipe
 which port || { echo >&2 "Missing installation of MacPorts (\`port\`)."; exit 1; }
-sudo port install gmake wget coreutils findutils nasm pkgconfig x86_64-elf-gcc
+sudo port install gmake wget coreutils findutils nasm pkgconfig #x86_64-elf-gcc
 sudo ln -s /opt/local/bin/gmake /opt/local/bin/make
 ### Macports doesn't have xorriso
 brew install xorriso

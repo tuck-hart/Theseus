@@ -11,6 +11,7 @@ extern crate spin;
 extern crate memory;
 extern crate kernel_config;
 extern crate block_allocator;
+extern crate task;
 
 use alloc::alloc::{GlobalAlloc, Layout};
 use memory::EntryFlags;
@@ -19,7 +20,7 @@ use irq_safety::MutexIrqSafe;
 use spin::Once;
 use alloc::boxed::Box;
 use block_allocator::FixedSizeBlockAllocator;
-
+use task::TaskRef;
 
 #[global_allocator]
 pub static GLOBAL_ALLOCATOR: Heap = Heap::empty();
@@ -34,6 +35,7 @@ pub static DEFAULT_ALLOCATOR: Once<Box<dyn GlobalAlloc + Send + Sync>> = Once::n
 /// The default allocator is the one which is set up after the basic system initialization is completed. 
 /// Currently it is initialized with an instance of `MultipleHeaps`.
 static DEFAULT_ALLOCATOR: Once<Box<dyn GlobalAlloc + Send + Sync>> = Once::new();
+
 
 /// The heap mapped pages should be writable
 pub const HEAP_FLAGS: EntryFlags = EntryFlags::WRITABLE;
@@ -61,7 +63,6 @@ pub struct Heap {
     initial_allocator: MutexIrqSafe<block_allocator::FixedSizeBlockAllocator>, 
 }
 
-
 impl Heap {
     /// Returns a heap in which only an empty initial allocator has been created.
     pub const fn empty() -> Heap {
@@ -71,9 +72,23 @@ impl Heap {
     }
 }
 
+fn getTask() -> Option<&'static TaskRef> {
+    let taskref = task::get_my_current_task(); 
+
+    return taskref;
+}
+
 unsafe impl GlobalAlloc for Heap {
 
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+
+        match getTask(){
+            Some(t) => t.update_memsize(layout.size(), true),
+            None => {
+                ();
+            }
+        };
+
         match DEFAULT_ALLOCATOR.get() {
             Some(allocator) => {
                 allocator.alloc(layout)
@@ -85,6 +100,15 @@ unsafe impl GlobalAlloc for Heap {
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+
+        match getTask(){
+            Some(t) => t.update_memsize(layout.size(), false),
+            None => {
+                ();
+            }
+        };
+        
+
         if (ptr as usize) < INITIAL_HEAP_END_ADDR {
             self.initial_allocator.lock().deallocate(ptr, layout);
         }
